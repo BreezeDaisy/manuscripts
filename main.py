@@ -31,13 +31,13 @@ logger.log_info("开始完整训练流程")
 model = DrivingBehaviorModel(config['model_config'])
 # 模型参数量统计
 # 统计参数并输出到日志
-    total_params = count_model_parameters(model)
-    formatted_params = format_params_count(total_params)
+total_params = count_model_parameters(model)
+formatted_params = format_params_count(total_params)
     
-    logger.info(f"模型可训练参数总量: {formatted_params} (原始数值: {total_params})")
-    # 若需要统计所有参数（包括冻结层）
-    total_all_params = count_model_parameters(model, trainable_only=False)
-    logger.info(f"模型所有参数总量: {format_params_count(total_all_params)} (原始数值: {total_all_params})")
+logger.info(f"模型可训练参数总量: {formatted_params} (原始数值: {total_params})")
+# 若需要统计所有参数（包括冻结层）
+total_all_params = count_model_parameters(model, trainable_only=False)
+logger.info(f"模型所有参数总量: {format_params_count(total_all_params)} (原始数值: {total_all_params})")
 
 logger.log_info(f"模型初始化完成，潜在维度: {config['model_config']['latent_dim']}")
 

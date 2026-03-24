@@ -1,3 +1,8 @@
 datasets/dataset/
 checkpoints/
 logs/
+
+# Python缓存目录（全局忽略__pycache__）
+__pycache__/
+*.py[cod]
+*$py.class
