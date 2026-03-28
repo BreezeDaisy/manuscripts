@@ -136,7 +136,7 @@ class EmotionEncoder(nn.Module):
         self.fc_logvar = nn.Linear(128 + latent_dim, latent_dim)
         
         # 分类头部
-        self.classifier = nn.Linear(128, self.num_classes)
+        self.classifier = nn.Linear(128+self.latent_dim, self.num_classes)
         
     def forward(self, x=None, label=None, trajectory_feature=None, return_classification=False):
         """
@@ -184,7 +184,7 @@ class EmotionEncoder(nn.Module):
         
         # 计算分类预测
         if return_classification:
-            pred = self.classifier(h)
+            pred = self.classifier(h_combined)
             return mu, logvar, z, pred
         
         return mu, logvar, z

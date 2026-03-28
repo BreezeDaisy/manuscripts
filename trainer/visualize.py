@@ -265,6 +265,67 @@ def visualize_stage2(loss_history, log_dir):
     print(f"Stage2 损失曲线保存到 {save_path}")
 
 
+def visualize_stage3(loss_history, log_dir):
+    """
+    可视化Stage3的损失曲线和评价指标
+    与stage2相同，包含训练和验证损失、minADE、minFDE、MR
+    
+    Args:
+        loss_history: 损失历史数据
+        log_dir: 日志目录
+    """
+    # 创建logs目录
+    os.makedirs(log_dir, exist_ok=True)
+    
+    # 创建画布和子图
+    plt.figure(figsize=(15, 6))
+    
+    # 左侧子图：训练和验证损失
+    plt.subplot(1, 2, 1)
+    if 'train_loss' in loss_history.get('stage3', {}) and 'val_loss' in loss_history.get('stage3', {}):
+        train_loss = loss_history['stage3']['train_loss']
+        val_loss = loss_history['stage3']['val_loss']
+        
+        plt.plot(train_loss, label='Train Loss')
+        plt.plot(val_loss, label='Val Loss')
+        plt.xlabel('Epochs')
+        plt.ylabel('Loss')
+        plt.title('Stage3 Loss Curve')
+        plt.legend()
+        plt.grid(True)
+    else:
+        plt.text(0.5, 0.5, 'No loss data', ha='center', va='center')
+        plt.axis('off')
+    
+    # 右侧子图：验证评价指标
+    plt.subplot(1, 2, 2)
+    if 'val_minADE' in loss_history.get('stage3', {}):
+        val_minADE = loss_history['stage3']['val_minADE']
+        val_minFDE = loss_history['stage3']['val_minFDE']
+        val_MR = loss_history['stage3']['val_MR']
+        
+        plt.plot(val_minADE, label='Val minADE')
+        plt.plot(val_minFDE, label='Val minFDE')
+        plt.plot(val_MR, label='Val MR')
+        plt.xlabel('Epochs')
+        plt.ylabel('Metrics')
+        plt.title('Stage3 Validation Metrics')
+        plt.legend()
+        plt.grid(True)
+    else:
+        plt.text(0.5, 0.5, 'No validation metrics data', ha='center', va='center')
+        plt.axis('off')
+    
+    # 调整布局
+    plt.tight_layout()
+    
+    # 保存图像
+    save_path = os.path.join(log_dir, 'stage3_loss_curve.png')
+    plt.savefig(save_path)
+    plt.close()
+    print(f"Stage3 损失曲线保存到 {save_path}")
+
+
 def visualize_loss(stage, loss_history, log_dir):
     """
     根据不同阶段调用对应的可视化函数
@@ -280,5 +341,7 @@ def visualize_loss(stage, loss_history, log_dir):
         visualize_stage1(loss_history, log_dir)
     elif stage == 'stage2':
         visualize_stage2(loss_history, log_dir)
+    elif stage == 'stage3':
+        visualize_stage3(loss_history, log_dir)
     else:
         print(f"不支持的训练阶段: {stage}")
