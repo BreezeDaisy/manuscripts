@@ -7,7 +7,7 @@ from .layers.transformer_blocks import Block
 
 class TrajectoryEncoder(nn.Module):
     """轨迹编码器 - 使用Transformer处理历史轨迹"""
-    def __init__(self, input_dim=5, hidden_dim=128, encoder_depth=4, num_heads=8, mlp_ratio=4.0, qkv_bias=False, drop_path=0.2):
+    def __init__(self, input_dim=5, hidden_dim=128, encoder_depth=4, num_heads=8, mlp_ratio=4.0, qkv_bias=True, drop_path=0.2):
         """
         初始化轨迹编码器
         
@@ -35,7 +35,7 @@ class TrajectoryEncoder(nn.Module):
         dpr = [x.item() for x in torch.linspace(0, drop_path, encoder_depth)]
         
         # 历史轨迹投影
-        self.h_proj = nn.Linear(7, hidden_dim)
+        self.h_proj = nn.Linear(5, hidden_dim)
         
         # 历史轨迹嵌入层
         self.h_embed = nn.ModuleList(
@@ -127,9 +127,12 @@ class TrajectoryEncoder(nn.Module):
         hist_key_padding_mask = data["x_key_padding_mask"]
         
         # 构建历史轨迹特征
+        # 只使用x的前2个维度（x, y坐标）
+        x_pos = data["x"][..., :2]
+        
         hist_feat = torch.cat(
             [
-                data["x"],
+                x_pos,
                 data["x_velocity_diff"][..., None],
                 (~hist_padding_mask[..., None]).float(),
             ],

@@ -87,7 +87,7 @@ class TotalLoss(nn.Module):
             cls_loss_d: 分心分类损失
         """
         # 计算轨迹损失
-        traj_loss = self.trajectory_loss(pred, target, pi)
+        traj_loss, min_ade, min_fde, mr = self.trajectory_loss(pred, target, pi) if target is not None else (0.0, 0.0, 0.0, 0.0)
         
         # 计算情绪VAE的KL散度损失
         kl_loss_e = self.vae_loss(mu_e, logvar_e)
@@ -98,10 +98,10 @@ class TotalLoss(nn.Module):
         # 计算正交损失
         orth_loss = self.orthogonal_loss(z_e, z_d)
         
-        # 计算情绪分类损失（Focal Loss）
+        # 计算情绪分类损失（交叉熵损失）
         cls_loss_e = 0.0
         if pred_e is not None and label_e is not None:
-            cls_loss_e = self.focal_loss(pred_e, label_e)
+            cls_loss_e = F.cross_entropy(pred_e, label_e)
         
         # 计算分心分类损失（交叉熵损失）
         cls_loss_d = 0.0
@@ -116,4 +116,4 @@ class TotalLoss(nn.Module):
                      self.lambda_cls_e * cls_loss_e + \
                      self.lambda_cls_d * cls_loss_d
         
-        return total_loss, traj_loss, kl_loss_e, kl_loss_d, orth_loss, cls_loss_e, cls_loss_d
+        return total_loss, traj_loss, kl_loss_e, kl_loss_d, orth_loss, cls_loss_e, cls_loss_d, min_ade, min_fde, mr

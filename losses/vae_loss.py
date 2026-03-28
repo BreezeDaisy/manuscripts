@@ -28,7 +28,7 @@ class VAELoss(nn.Module):
             kl_loss: KL散度损失
         """
         # 计算KL散度
-        kl_loss = -0.5 * torch.sum(1 + logvar - mu.pow(2) - logvar.exp())
+        kl_loss = -0.5 * torch.mean(1 + logvar - mu.pow(2) - logvar.exp())
         
         # 乘以权重
         kl_loss = self.beta * kl_loss

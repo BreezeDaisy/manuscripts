@@ -24,13 +24,13 @@ model_config = {
 
 # 训练配置
 train_config = {
-    'batch_size': 512,  # 增大batch_size到512
-    'learning_rate': 2e-4,  # 按线性比例调整学习率
+    'batch_size': 256,  # 增大batch_size到256
+    'learning_rate': 1e-4,  # 按线性比例调整学习率
     # 建议：batch_size=512时设置为2e-4，batch_size=1024时设置为4e-4
     'epochs': {
         'stage0': 50,  # 轨迹网络预训练
-        'stage1': 30,  # 情绪和分心编码器训练
-        'stage2': 30,  # FiLM调制训练
+        'stage1': 50,  # 情绪和分心编码器训练
+        'stage2': 50,  # FiLM调制训练
         'stage3': 50,  # 联合微调
     },
     'weight_decay': 1e-5,
@@ -61,6 +61,6 @@ data_config = {
 other_config = {
     'log_dir': 'logs/',
     'checkpoint_dir': 'checkpoints/',
-    'save_interval': 10,  # 每10个epoch保存一次模型
-    'eval_interval': 5,  # 每5个epoch评估一次
+    'save_interval': 1,  # 每1个epoch保存一次模型
+    'eval_interval': 1,  # 每1个epoch评估一次
 }

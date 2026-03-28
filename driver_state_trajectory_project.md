@@ -111,23 +111,29 @@ L_orth = \|\| z_e\^T z_d \|\|
 ## 5. 训练流程
 
 ### Stage0：轨迹模型预训练
-
+数据集：emp
+权重：预训练的情绪、分心模型权重
 训练 Trajectory Encoder + Decoder\
 优化 L_traj
 
 ### Stage1：状态编码器训练
-
+数据集：情绪、分心数据集
 训练 Emotion + Distraction Encoder\
 优化 分类 + KL
+生成联合权重：stage1_best_combined.pth
 
 ### Stage2：FiLM调制训练
-
+数据集：emp
+权重：加载stage1_best_combined.pth
 冻结情绪和分心编码器，训练 FiLM + Decoder + 轨迹编码器
 优化 L_traj
 
-### Stage3：已合并到Stage2
+### Stage3：联合微调
+数据集：emp
+权重：加载stage2_best_combined.pth
+训练全模型，优化 L_traj
 
-取消Stage3，与Stage2训练合并
+### Stage4：全流程依次训练
 
 ------------------------------------------------------------------------
 

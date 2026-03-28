@@ -80,32 +80,50 @@ class DrivingBehaviorModel(nn.Module):
         x_agent, x_encoder, key_padding_mask = self.trajectory_encoder(trajectory_data)
         
         # 编码情绪信息
-        if use_trajectory_feature:
-            # 使用轨迹特征作为情绪编码器的输入
-            if return_classification:
-                mu_e, logvar_e, z_e, pred_e = self.emotion_encoder(None, label_e, x_agent, return_classification=True)
+        if x_e is not None or use_trajectory_feature:
+            if use_trajectory_feature:
+                # 使用轨迹特征作为情绪编码器的输入
+                if return_classification:
+                    mu_e, logvar_e, z_e, pred_e = self.emotion_encoder(x=None, label=label_e, trajectory_feature=x_agent, return_classification=True)
+                else:
+                    mu_e, logvar_e, z_e = self.emotion_encoder(x=None, label=label_e, trajectory_feature=x_agent)
             else:
-                mu_e, logvar_e, z_e = self.emotion_encoder(None, label_e, x_agent)
+                # 使用图像作为情绪编码器的输入
+                if return_classification:
+                    mu_e, logvar_e, z_e, pred_e = self.emotion_encoder(x=x_e, label=label_e, return_classification=True)
+                else:
+                    mu_e, logvar_e, z_e = self.emotion_encoder(x=x_e, label=label_e)
         else:
-            # 使用图像作为情绪编码器的输入
+            # 如果不需要情绪编码器，使用默认值
+            batch_size = trajectory_data["x"].shape[0]
+            mu_e = torch.zeros(batch_size, self.emotion_encoder.latent_dim, device=x_agent.device)
+            logvar_e = torch.zeros(batch_size, self.emotion_encoder.latent_dim, device=x_agent.device)
+            z_e = torch.zeros(batch_size, self.emotion_encoder.latent_dim, device=x_agent.device)
             if return_classification:
-                mu_e, logvar_e, z_e, pred_e = self.emotion_encoder(x_e, label_e, return_classification=True)
-            else:
-                mu_e, logvar_e, z_e = self.emotion_encoder(x_e, label_e)
+                pred_e = torch.zeros(batch_size, self.emotion_encoder.num_classes, device=x_agent.device)
         
         # 编码分心信息
-        if use_trajectory_feature:
-            # 使用轨迹特征作为分心编码器的输入
-            if return_classification:
-                mu_d, logvar_d, z_d, pred_d = self.distraction_encoder(None, label_d, x_agent, return_classification=True)
+        if x_d is not None or use_trajectory_feature:
+            if use_trajectory_feature:
+                # 使用轨迹特征作为分心编码器的输入
+                if return_classification:
+                    mu_d, logvar_d, z_d, pred_d = self.distraction_encoder(x=None, label=label_d, trajectory_feature=x_agent, return_classification=True)
+                else:
+                    mu_d, logvar_d, z_d = self.distraction_encoder(x=None, label=label_d, trajectory_feature=x_agent)
             else:
-                mu_d, logvar_d, z_d = self.distraction_encoder(None, label_d, x_agent)
+                # 使用图像作为分心编码器的输入
+                if return_classification:
+                    mu_d, logvar_d, z_d, pred_d = self.distraction_encoder(x=x_d, label=label_d, return_classification=True)
+                else:
+                    mu_d, logvar_d, z_d = self.distraction_encoder(x=x_d, label=label_d)
         else:
-            # 使用图像作为分心编码器的输入
+            # 如果不需要分心编码器，使用默认值
+            batch_size = trajectory_data["x"].shape[0]
+            mu_d = torch.zeros(batch_size, self.distraction_encoder.latent_dim, device=x_agent.device)
+            logvar_d = torch.zeros(batch_size, self.distraction_encoder.latent_dim, device=x_agent.device)
+            z_d = torch.zeros(batch_size, self.distraction_encoder.latent_dim, device=x_agent.device)
             if return_classification:
-                mu_d, logvar_d, z_d, pred_d = self.distraction_encoder(x_d, label_d, return_classification=True)
-            else:
-                mu_d, logvar_d, z_d = self.distraction_encoder(x_d, label_d)
+                pred_d = torch.zeros(batch_size, self.distraction_encoder.num_classes, device=x_agent.device)
         
         # FiLM调制
         x_agent_modulated = self.film_module(x_agent, z_e, z_d)
